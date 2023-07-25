@@ -7,15 +7,18 @@ terraform {
   }
 
   backend "azurerm" {
-    resource_group_name                = "RG-TerraForm-SA"
-    storage_account_name               = "saterraform7"
-    container_name                     = "tfstate"
-    key                                = "terraform.tfstate"
+    resource_group_name                = var.resource_group_name
+    storage_account_name               = var.storage_account_name
+    container_name                     = var.container_name
+    key                                = var.key
 }
 }
 
 provider "azurerm" {
   # Configuration optionss
+   client_id = 
+   tenant_id = 
+   subscription_id = 
   features {
   }
 }
