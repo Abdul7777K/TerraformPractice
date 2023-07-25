@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-    paths: 
-      - "TerraformPractice"
-      - ".github/workflows/tf_*.yml"
 #Special permissions required for OIDC authentication
 permissions:
   id-token: write
