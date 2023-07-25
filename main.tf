@@ -11,6 +11,7 @@ terraform {
     storage_account_name               = var.storage_account_name
     container_name                     = var.container_name
     key                                = var.key
+    use_oidc                           = true
 }
 }
 
@@ -21,6 +22,7 @@ provider "azurerm" {
   #  subscription_id = 
   features {
   }
+  use_oidc = true
 }
 
 module "RG" {
