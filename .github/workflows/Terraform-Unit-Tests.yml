@@ -1,5 +1,5 @@
 #Validate, Format, checkov security scan, Upload results to GHAS
-name: 'Terraform Unit Tests'
+name: 'CI'
 
 on:
   push:
