@@ -2,6 +2,8 @@ name: 'Terraform Unit Tests'
 
 on:
   push:
+    branches:
+      - main
     paths: 
       - "TerraformPractice"
       - ".github/workflows/tf_*.yml"
