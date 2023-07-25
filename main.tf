@@ -16,9 +16,9 @@ terraform {
 
 provider "azurerm" {
   # Configuration optionss
-   client_id = 
-   tenant_id = 
-   subscription_id = 
+  #  client_id = var
+  #  tenant_id = 
+  #  subscription_id = 
   features {
   }
 }
