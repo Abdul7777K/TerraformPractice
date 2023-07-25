@@ -1,0 +1,106 @@
+name: 'Terraform Plan/Apply'
+
+on:
+  workflow_dispatch:
+    inputs:
+      ENVIRONMENT:
+        type: environment
+        description: Github environment defines the Azure subscription to be used for deploying resources
+        required: true
+
+#Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  actions: read
+  security-events: write
+
+jobs:
+  tf-plan-apply-job:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: iac-terraform
+    environment: ${{ github.event.inputs.ENVIRONMENT }}
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Azure Login
+      if: ${{true}}
+      uses: Azure/login@v1
+      id: az_login
+      with:
+        #creds: ${{ secrets.AZURE_CREDENTIALS }}
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+        
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+
+    - name: Terraform fmt
+      id: fmt
+      run: terraform fmt -check -recursive
+      continue-on-error: true
+      
+    - name: Terraform Init
+      id: init
+      run: terraform init -backend-config="environments/${{ github.event.inputs.ENVIRONMENT }}/backend.tfvars"
+      
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color
+      
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -var-file="environments/${{ github.event.inputs.ENVIRONMENT }}/env.tfvars" -var-file="global.tfvars" --out=plan.tfplan
+      continue-on-error: true
+
+    - name: Terraform Plan Status
+      if: steps.plan.outcome == 'failure'
+      run: exit 1
+
+    - uses: actions/github-script@v6
+      #if: github.event_name == 'pull_request'
+      if: ${{ false }}
+      env:
+        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+          #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+          <details><summary>Validation Output</summary>
+          
+          \`\`\`\n
+            ${{ steps.validate.outputs.stdout }}
+          \`\`\`
+          
+          </details>
+          
+          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+          
+          <details><summary>Show Plan</summary>
+          
+          \`\`\`\n
+            ${process.env.PLAN}
+          \`\`\`
+          
+          </details>
+          
+          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+          
+            github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+            })
+            
+    # Terraform Apply
+    - name: Terraform Apply
+      run: terraform apply -auto-approve plan.tfplan
