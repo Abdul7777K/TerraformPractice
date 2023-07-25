@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths: 
+      - ".github/workflows/tf_*.yml"
 #Special permissions required for OIDC authentication
 permissions:
   id-token: write
