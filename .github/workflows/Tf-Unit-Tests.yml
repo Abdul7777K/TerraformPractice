@@ -5,13 +5,6 @@ on:
     paths: 
       - "TerraformPractice"
       - ".github/workflows/tf_*.yml"
-  workflow_dispatch:
-    inputs:
-      ENVIRONMENT:
-        type: environment
-        description: Github environment defines the Azure subscription to be used for deploying resources
-        required: true
-        default: FreeTrail
 #Special permissions required for OIDC authentication
 permissions:
   id-token: write
