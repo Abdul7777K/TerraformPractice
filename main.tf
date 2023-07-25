@@ -15,7 +15,7 @@ terraform {
 }
 
 provider "azurerm" {
-  # Configuration options
+  # Configuration optionss
   features {
   }
 }
