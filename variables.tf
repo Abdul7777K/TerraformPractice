@@ -1,12 +1,11 @@
-variable "resource_group_name" {
+variable "subscription_id" {
   type = string
 }
-variable "storage_account_name" {
+variable "tenant_id" {
   type = string
 }
-variable "container_name" {
+variable "client_Id" {
   type = string
 }
-variable "key" {
-  type = string
-}
+
+
