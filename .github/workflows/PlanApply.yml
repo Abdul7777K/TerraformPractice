@@ -15,89 +15,36 @@ permissions:
   pull-requests: write
   actions: read
   security-events: write
-
+env:
+  tf_actions_working_dir: FreeTrail
+  
 jobs:
-  tf-plan-apply-job:
+  plan:
+    name: Terraform plan
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.ENVIRONMENT }}
+    environment: FreeTrail
+    defaults:
+      run:
+        working-directory: ${{ env.tf_actions_working_dir }}
+    
     steps:
-    # Checkout the repository to the GitHub Actions runner
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Azure Login
-      if: ${{true}}
-      uses: Azure/login@v1
-      id: az_login
+    - uses: actions/checkout@v2
+
+    - name: Log in to Azure using OIDC
+      uses: azure/login@v1
       with:
-        #creds: ${{ secrets.AZURE_CREDENTIALS }}
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-        
-    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - name: Terraform fmt
-      id: fmt
-      run: terraform fmt -check -recursive
-      continue-on-error: true
-      
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+    
     - name: Terraform Init
       id: init
-      run: terraform init -backend-config=./backend.tfvars"
-      
-    - name: Terraform Validate
-      id: validate
-      run: terraform validate -no-color
-      
-    - name: Terraform Plan
-      id: plan
-      run: terraform plan --out=plan.tfplan
-      continue-on-error: true
-
-    - name: Terraform Plan Status
-      if: steps.plan.outcome == 'failure'
-      run: exit 1
-
-    - uses: actions/github-script@v6
-      #if: github.event_name == 'pull_request'
-      if: ${{ false }}
+      run: terraform init
       env:
-        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-          #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-          <details><summary>Validation Output</summary>
-          
-          \`\`\`\n
-            ${{ steps.validate.outputs.stdout }}
-          \`\`\`
-          
-          </details>
-          
-          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-          
-          <details><summary>Show Plan</summary>
-          
-          \`\`\`\n
-            ${process.env.PLAN}
-          \`\`\`
-          
-          </details>
-          
-          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
-          
-            github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-            })
-            
-    # Terraform Apply
-    - name: Terraform Apply
-      run: terraform apply -auto-approve plan.tfplan
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        ARM_USE_OIDC: true
