@@ -33,7 +33,7 @@ jobs:
           client-id: "35235280-c7c2-49a7-99c3-9dc48a54d919"
           tenant-id: "acbae620-8f3f-470a-ae82-6d8fc8b498d2"
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-          ARM_SKIP_PROVIDER_REGISTRATION: true
+          #ARM_SKIP_PROVIDER_REGISTRATION: true
         #'client-id', 'tenant-id', 'subscription-id'
     # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
     - name: Setup Terraform
@@ -46,7 +46,7 @@ jobs:
       
     - name: Terraform Init
       id: init
-      run: terraform init #-backend-config="environments/${{ github.event.inputs.ENVIRONMENT }}/backend.tfvars"
+      run: terraform init -backend-config="${{ github.event.inputs.ENVIRONMENT }}/backend.tfvars"
       
     - name: Terraform Validate
       id: validate
