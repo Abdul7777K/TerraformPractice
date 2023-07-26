@@ -19,9 +19,6 @@ permissions:
 jobs:
   tf-plan-apply-job:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: TerraformPractice
     environment: ${{ github.event.inputs.ENVIRONMENT }}
     steps:
     # Checkout the repository to the GitHub Actions runner
