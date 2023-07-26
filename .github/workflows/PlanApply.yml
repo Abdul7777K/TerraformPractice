@@ -46,7 +46,7 @@ jobs:
       
     - name: Terraform Init
       id: init
-      run: terraform init -backend-config=./environment/backend.tfvars #-backend-config="${{ github.event.inputs.ENVIRONMENT }}/backend.tfvars"
+      run: terraform init -backend-config=./backend.tfvars #-backend-config="${{ github.event.inputs.ENVIRONMENT }}/backend.tfvars"
       
     - name: Terraform Validate
       id: validate
