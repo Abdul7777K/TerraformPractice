@@ -23,9 +23,6 @@ jobs:
     name: Terraform plan
     runs-on: ubuntu-latest
     environment: FreeTrail
-    defaults:
-      run:
-        working-directory: ${{ env.tf_actions_working_dir }}
     
     steps:
     - uses: actions/checkout@v2
