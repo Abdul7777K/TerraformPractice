@@ -90,16 +90,16 @@ jobs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
-    - name: Build
-      shell: pwsh
-      run: |
-        ls /home/runner/work/TerraformPractice/TerraformPractice
+    
     - name: Download the plan
       uses: actions/download-artifact@v2
       with:
         name: tf-plan
         path: ./ # Download the artifact to the root directory
-
+    - name: Build
+      shell: pwsh
+      run: |
+        ls /home/runner/work/TerraformPractice/TerraformPractice
     - name: Terraform Apply
       run: terraform plan -out=tfplan auto-approve # Update the path to the plan file
       env:
