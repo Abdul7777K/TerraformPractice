@@ -8,7 +8,6 @@ on:
         description: Github environment defines the Azure subscription to be used for deploying resources
         required: true
 
-#Special permissions required for OIDC authentication
 permissions:
   id-token: write
   contents: read
@@ -22,7 +21,8 @@ jobs:
   plan:
     name: Terraform plan
     runs-on: ubuntu-latest
-    environment: FreeTrail
+    environment: 
+      name: ${{ github.event.inputs.ENVIRONMENT }}
     
     steps:
     - uses: actions/checkout@v2
@@ -32,7 +32,7 @@ jobs:
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
@@ -42,7 +42,7 @@ jobs:
       run: terraform init
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         ARM_USE_OIDC: true
     - name: Calculate destroy arg
@@ -61,7 +61,7 @@ jobs:
       run: terraform plan $DESTROY -no-color --out=out.tfplan
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         ARM_USE_OIDC: true
         DESTROY: ${{ steps.destroy_arg.outputs.val }}
@@ -71,3 +71,37 @@ jobs:
       with:
         name: tf-plan
         path: ${{ env.tf_actions_working_dir }}/out.tfplan
+      
+  apply:
+    needs: plan
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    environment: 
+      name: ${{ github.event.inputs.ENVIRONMENT }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Log in to Azure using OIDC
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: Download the plan
+      uses: actions/download-artifact@v2
+      with:
+        name: tf-plan
+        path: ${{ env.tf_actions_working_dir }}/out.tfplan
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve "out.tfplan"
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        ARM_USE_OIDC: true
