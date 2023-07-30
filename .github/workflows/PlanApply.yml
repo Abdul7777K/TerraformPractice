@@ -101,7 +101,7 @@ jobs:
       run: |
         ls /home/runner/work/TerraformPractice/TerraformPractice
     - name: Terraform Apply
-      run: terraform plan -out=tfplan auto-approve # Update the path to the plan file
+      run: terraform plan out.tfplan auto-approve # Update the path to the plan file
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
