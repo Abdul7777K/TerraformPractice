@@ -93,7 +93,7 @@ jobs:
     - name: Build
       shell: pwsh
       run: |
-        ls
+        ls /home/runner/work/TerraformPractice/TerraformPractice
     - name: Download the plan
       uses: actions/download-artifact@v2
       with:
