@@ -37,7 +37,7 @@ jobs:
 
     - name: Terraform Init
       id: init
-      run: terraform init -upgrade
+      run: terraform init
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
@@ -101,7 +101,7 @@ jobs:
         path: ./ # Download the artifact to the root directory
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve "./out.tfplan" # Update the path to the plan file
+      run: terraform plan -out=tfplan auto-approve # Update the path to the plan file
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
