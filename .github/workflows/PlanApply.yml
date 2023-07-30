@@ -14,8 +14,6 @@ permissions:
   pull-requests: write
   actions: read
   security-events: write
-env:
-  tf_actions_working_dir: FreeTrail
   
 jobs:
   plan:
@@ -70,7 +68,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: tf-plan
-        path: ${{ env.tf_actions_working_dir }}/out.tfplan
+        path: ./out.tfplan
       
   apply:
     needs: plan
@@ -96,7 +94,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: tf-plan
-        path: ${{ env.tf_actions_working_dir }}/out.tfplan
+        path: ./out.tfplan
 
     - name: Terraform Apply
       run: terraform apply -auto-approve "out.tfplan"
