@@ -90,7 +90,10 @@ jobs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
-
+    - name: Build
+      shell: pwsh
+      run: |
+        ls
     - name: Download the plan
       uses: actions/download-artifact@v2
       with:
@@ -98,7 +101,7 @@ jobs:
         path: ./ # Download the artifact to the root directory
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve "./tf-plan/out.tfplan" # Update the path to the plan file
+      run: terraform apply -auto-approve "./out.tfplan" # Update the path to the plan file
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
