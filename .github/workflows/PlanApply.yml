@@ -52,44 +52,9 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         ARM_USE_OIDC: true
-
-    - name: Upload the plan
-      uses: actions/upload-artifact@v3
-      with:
-        name: tf-plan
-        path: ./plan.tfplan
-
-  apply:
-    needs: plan
-    name: Terraform Apply
-    runs-on: ubuntu-latest
-    environment: 
-      name: ${{ github.event.inputs.ENVIRONMENT }}
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Log in to Azure using OIDC
-      uses: azure/login@v1
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-    
-    - name: Download the plan
-      uses: actions/download-artifact@v2
-      with:
-        name: tf-plan
-        path: ./ # Download the artifact to the root directory
-    - name: Build
-      shell: pwsh
-      run: |
-        ls /home/runner/work/TerraformPractice/TerraformPractice
+        
     - name: Terraform Apply
-      run: terraform apply -auto-approve ./plan.tfplan # Update the path to the plan file
+      run: terraform apply -auto-approve plan.tfplan # Update the path to the plan file
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
