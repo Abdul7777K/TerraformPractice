@@ -1,62 +1,19 @@
-name: 'Terraform Plan/Apply'
+name: testing
 
 on:
-  workflow_dispatch:
-    inputs:
-      ENVIRONMENT:
-        type: environment
-        description: Github environment defines the Azure subscription to be used for deploying resources
-        required: true
-
-permissions:
-  id-token: write
-  contents: read
-  pull-requests: write
-  actions: read
-  security-events: write
+  push:
+    branches:
+      - test
 
 jobs:
-  plan:
-    name: Terraform plan
+
+# Do something
+
+  deploy:
     runs-on: ubuntu-latest
-    environment: 
-      name: ${{ github.event.inputs.ENVIRONMENT }}
-
     steps:
-    - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@master
 
-    - name: Log in to Azure using OIDC
-      uses: azure/login@v1
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-
-    - name: Terraform Init
-      id: init
-      run: terraform init
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        ARM_USE_OIDC: true
-
-    - name: Terraform Plan
-      id: plan
-      run: terraform plan --out=plan.tfplan
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        ARM_USE_OIDC: true
-        
-    - name: Terraform Apply
-      run: terraform apply -auto-approve plan.tfplan # Update the path to the plan file
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        ARM_USE_OIDC: true
+      
+      - run: ls
